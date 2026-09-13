@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $title ?? 'Panel' }} · EDUTECH</title>
+    @vite(['resources/css/app.css','resources/js/app.js'])
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+<div x-data="{ open:false }" class="min-h-screen lg:flex">
+    <aside :class="open ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white transition-transform lg:static lg:translate-x-0">
+        <div class="flex h-20 items-center gap-3 border-b border-white/10 px-7">
+            <div class="grid size-10 place-items-center rounded-xl bg-teal-400 font-black text-slate-950">E</div>
+            <div><div class="font-black tracking-widest">EDUTECH</div><div class="text-xs text-slate-400">Administración académica</div></div>
+        </div>
+        <nav class="flex-1 space-y-1 px-4 py-7 text-sm">
+            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">⌂ <span>Dashboard</span></a>
+            <a class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}" href="{{ route('students.index') }}">♙ <span>Estudiantes</span></a>
+            <a class="nav-link {{ request()->routeIs('enrollments.*') ? 'active' : '' }}" href="{{ route('enrollments.index') }}">▤ <span>Matrículas</span></a>
+            <a class="nav-link {{ request()->routeIs('portfolio.*', 'payments.*', 'receipts.*') ? 'active' : '' }}" href="{{ route('portfolio.index') }}">$ <span>Cartera</span></a>
+            <a class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}" href="{{ route('imports.create') }}">⇧ <span>Importar Excel</span></a>
+            <a class="nav-link {{ request()->routeIs('portfolio.*', 'payments.*', 'receipts.*') ? 'active' : '' }}" href="{{ route('portfolio.index') }}">$ <span>Cartera</span></a>
+            <a class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}" href="{{ route('imports.create') }}">⇧ <span>Importar Excel</span></a>
+            <div class="px-4 pb-2 pt-7 text-[10px] font-bold uppercase tracking-[.2em] text-slate-500">Configuración</div>
+            <span class="nav-link opacity-45">◇ <span>Programas y cursos</span></span>
+            <span class="nav-link opacity-45">⌖ <span>Sedes y grupos</span></span>
+        </nav>
+        <div class="border-t border-white/10 p-4">
+            <div class="mb-3 flex items-center gap-3 px-3"><div class="grid size-9 place-items-center rounded-full bg-teal-400/20 font-bold text-teal-300">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div class="min-w-0"><div class="truncate text-sm font-semibold">{{ auth()->user()->name }}</div><div class="text-xs capitalize text-slate-400">{{ auth()->user()->role->value }}</div></div></div>
+            <form method="POST" action="{{ route('logout') }}">@csrf<button class="w-full rounded-xl px-3 py-2 text-left text-sm text-slate-400 hover:bg-white/5 hover:text-white">Cerrar sesión</button></form>
+        </div>
+    </aside>
+    <div x-show="open" @click="open=false" class="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"></div>
+    <main class="min-w-0 flex-1">
+        <header class="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-5 lg:px-9">
+            <div class="flex items-center gap-4"><button @click="open=true" class="rounded-lg border border-slate-200 px-3 py-2 lg:hidden">☰</button><div><p class="text-xs font-semibold uppercase tracking-wider text-teal-600">EDUTECH Admin</p><h1 class="text-xl font-bold">{{ $title ?? 'Panel' }}</h1></div></div>
+            <div class="hidden text-right sm:block"><p class="text-sm font-medium">{{ now()->translatedFormat('l, d \d\e F') }}</p><p class="text-xs text-slate-400">Sede Santa Rosa</p></div>
+        </header>
+        <div class="p-5 lg:p-9">
+            @if(session('success'))<div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('success') }}</div>@endif
+            {{ $slot ?? '' }}
+            @yield('content')
+        </div>
+    </main>
+</div>
+</body></html>

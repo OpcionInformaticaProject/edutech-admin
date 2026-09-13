@@ -1,0 +1,10 @@
+@extends('layouts.app', ['title'=>'Dashboard'])
+@section('content')
+<div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p class="text-slate-500">Resumen de la operación académica</p><h2 class="mt-1 text-2xl font-bold">Hola, {{ explode(' ', auth()->user()->name)[0] }} 👋</h2></div><a href="{{ route('students.create') }}" class="btn-primary">+ Nuevo estudiante</a></div>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+@foreach([['Estudiantes',$students,'bg-blue-50 text-blue-600'],['Matrículas activas',$activeEnrollments,'bg-emerald-50 text-emerald-600'],['Pendientes',$pendingEnrollments,'bg-amber-50 text-amber-600'],['Grupos activos',$groups,'bg-violet-50 text-violet-600']] as $card)
+<div class="card"><div class="flex items-start justify-between"><div><p class="text-sm font-medium text-slate-500">{{ $card[0] }}</p><p class="mt-3 text-3xl font-black">{{ number_format($card[1]) }}</p></div><span class="grid size-11 place-items-center rounded-xl {{ $card[2] }}">◆</span></div></div>@endforeach
+</div>
+<div class="card mt-7"><div class="mb-5 flex items-center justify-between"><div><h3 class="font-bold">Matrículas recientes</h3><p class="text-sm text-slate-500">Últimos movimientos registrados</p></div><a href="{{ route('enrollments.index') }}" class="text-sm font-semibold text-teal-700">Ver todas →</a></div>
+<div class="overflow-x-auto"><table><thead><tr><th>Estudiante</th><th>Curso / grupo</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>@forelse($recentEnrollments as $item)<tr><td><a class="font-semibold hover:text-teal-700" href="{{ route('students.show',$item->student) }}">{{ $item->student->full_name }}</a></td><td>{{ $item->group->course->name }} · {{ $item->group->name }}</td><td>{{ $item->enrollment_date->format('d/m/Y') }}</td><td><span class="badge">{{ $item->status->label() }}</span></td></tr>@empty<tr><td colspan="4" class="py-10 text-center text-slate-400">Aún no hay matrículas registradas.</td></tr>@endforelse</tbody></table></div></div>
+@endsection

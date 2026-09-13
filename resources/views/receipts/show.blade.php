@@ -1,0 +1,2 @@
+@extends('layouts.app', ['title' => 'Recibo '.$receipt->number])
+@section('content')<div class="mx-auto max-w-2xl"><div class="card p-8">@include('receipts.partials.document')</div><div class="mt-5 flex gap-3"><a class="btn-primary" target="_blank" href="{{ route('receipts.pdf',$receipt) }}">Ver / imprimir PDF</a><a class="btn-secondary" href="{{ route('portfolio.index') }}">Volver a cartera</a></div></div>@endsection
