@@ -1,5 +1,6 @@
 @extends('layouts.app', ['title'=>'Dashboard'])
 @section('content')
+<div class="mb-6 flex h-20 items-center"><x-brand-logo :organization="auth()->user()->organization" class="max-h-20 max-w-64" /></div>
 <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p class="text-slate-500">Resumen de la operación académica</p><h2 class="mt-1 text-2xl font-bold">Hola, {{ explode(' ', auth()->user()->name)[0] }} 👋</h2></div><a href="{{ route('students.create') }}" class="btn-primary">+ Nuevo estudiante</a></div>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 @foreach([['Estudiantes',$students,'bg-blue-50 text-blue-600'],['Matrículas activas',$activeEnrollments,'bg-emerald-50 text-emerald-600'],['Pendientes',$pendingEnrollments,'bg-amber-50 text-amber-600'],['Grupos activos',$groups,'bg-violet-50 text-violet-600']] as $card)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,7 @@ class AuthController extends Controller
 {
     public function create(): View
     {
-        return view('auth.login');
+        return view('auth.login', ['organization' => Organization::where('active', true)->oldest()->first()]);
     }
 
     public function store(Request $request): RedirectResponse

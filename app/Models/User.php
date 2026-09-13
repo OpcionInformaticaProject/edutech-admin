@@ -33,4 +33,9 @@ class User extends Authenticatable
             'active' => 'boolean',
         ];
     }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
 }

@@ -23,4 +23,9 @@ class Receipt extends Model
     {
         return $this->belongsTo(Payment::class);
     }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
 }

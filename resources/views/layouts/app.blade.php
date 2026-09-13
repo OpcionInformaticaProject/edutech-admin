@@ -2,15 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Panel' }} · EDUTECH</title>
+    <title>{{ $title ?? 'Panel' }} · {{ auth()->user()->organization?->name ?? 'EDUTECH' }}</title>
+    @if(auth()->user()->organization?->brandingUrl('favicon'))<link rel="icon" href="{{ auth()->user()->organization->brandingUrl('favicon') }}">@endif
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">
 <div x-data="{ open:false }" class="min-h-screen lg:flex">
     <aside :class="open ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white transition-transform lg:static lg:translate-x-0">
         <div class="flex h-20 items-center gap-3 border-b border-white/10 px-7">
-            <div class="grid size-10 place-items-center rounded-xl bg-teal-400 font-black text-slate-950">E</div>
-            <div><div class="font-black tracking-widest">EDUTECH</div><div class="text-xs text-slate-400">Administración académica</div></div>
+            <x-brand-logo :organization="auth()->user()->organization" class="h-11 max-w-44 text-white" />
         </div>
         <nav class="flex-1 space-y-1 px-4 py-7 text-sm">
             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">⌂ <span>Dashboard</span></a>
@@ -22,6 +22,7 @@
             <div class="px-4 pb-2 pt-7 text-[10px] font-bold uppercase tracking-[.2em] text-slate-500">Configuración</div>
             <span class="nav-link opacity-45">◇ <span>Programas y cursos</span></span>
             <span class="nav-link opacity-45">⌖ <span>Sedes y grupos</span></span>
+            @if(in_array(auth()->user()->role->value, ['superadmin','admin'], true))<a class="nav-link {{ request()->routeIs('branding.*') ? 'active' : '' }}" href="{{ route('branding.edit') }}">◐ <span>Apariencia / Marca</span></a>@endif
         </nav>
         <div class="border-t border-white/10 p-4">
             <div class="mb-3 flex items-center gap-3 px-3"><div class="grid size-9 place-items-center rounded-full bg-teal-400/20 font-bold text-teal-300">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div class="min-w-0"><div class="truncate text-sm font-semibold">{{ auth()->user()->name }}</div><div class="text-xs capitalize text-slate-400">{{ auth()->user()->role->value }}</div></div></div>
@@ -31,7 +32,7 @@
     <div x-show="open" @click="open=false" class="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"></div>
     <main class="min-w-0 flex-1">
         <header class="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-5 lg:px-9">
-            <div class="flex items-center gap-4"><button @click="open=true" class="rounded-lg border border-slate-200 px-3 py-2 lg:hidden">☰</button><div><p class="text-xs font-semibold uppercase tracking-wider text-teal-600">EDUTECH Admin</p><h1 class="text-xl font-bold">{{ $title ?? 'Panel' }}</h1></div></div>
+            <div class="flex items-center gap-4"><button @click="open=true" class="rounded-lg border border-slate-200 px-3 py-2 lg:hidden">☰</button><x-brand-logo :organization="auth()->user()->organization" class="hidden h-9 max-w-32 sm:block lg:hidden" /><div><p class="text-xs font-semibold uppercase tracking-wider text-teal-600">{{ auth()->user()->organization?->name ?? 'EDUTECH' }} Admin</p><h1 class="text-xl font-bold">{{ $title ?? 'Panel' }}</h1></div></div>
             <div class="hidden text-right sm:block"><p class="text-sm font-medium">{{ now()->translatedFormat('l, d \d\e F') }}</p><p class="text-xs text-slate-400">Sede Santa Rosa</p></div>
         </header>
         <div class="p-5 lg:p-9">

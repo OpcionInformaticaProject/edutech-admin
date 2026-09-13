@@ -9,11 +9,11 @@ class ReceiptController extends Controller
 {
     public function show(Receipt $receipt)
     {
-        return view('receipts.show', ['receipt' => $receipt->load('payment.enrollment.student')]);
+        return view('receipts.show', ['receipt' => $receipt->load(['organization', 'payment.enrollment.student'])]);
     }
 
     public function pdf(Receipt $receipt)
     {
-        return Pdf::loadView('receipts.pdf', ['receipt' => $receipt->load('payment.enrollment.student')])->stream($receipt->number.'.pdf');
+        return Pdf::loadView('receipts.pdf', ['receipt' => $receipt->load(['organization', 'payment.enrollment.student'])])->stream($receipt->number.'.pdf');
     }
 }

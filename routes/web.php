@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EnrollmentReviewController;
@@ -20,6 +21,8 @@ Route::middleware('guest')->group(function () {
 });
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/configuracion/apariencia', [BrandingController::class, 'edit'])->name('branding.edit');
+    Route::put('/configuracion/apariencia', [BrandingController::class, 'update'])->name('branding.update');
     Route::get('/estudiantes', StudentTable::class)->name('students.index');
     Route::resource('students', StudentController::class)->only(['create', 'store', 'show', 'edit', 'update']);
     Route::resource('enrollments', EnrollmentController::class)->only(['index', 'create', 'store']);
