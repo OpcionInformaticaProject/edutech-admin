@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\Status;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -19,6 +20,16 @@ class OperationalReportsTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_technical_statuses_are_translated_centrally(): void
+    {
+        $this->assertSame('Activo', Status::label('active'));
+        $this->assertSame('Retirado', Status::label('withdrawn'));
+        $this->assertSame('Por revisar', Status::label('needs_review'));
+        $this->assertSame('Revisado', Status::label('complete'));
+        $this->assertSame('Reversado', Status::label('reversed'));
+        $this->assertSame('Pendiente de pago', Status::label('pending_payment'));
+    }
+
     public function test_dashboard_and_reports_use_valid_portfolio_revenue_and_overdue_data(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -26,7 +37,7 @@ class OperationalReportsTest extends TestCase
         [$enrollment, $otherEnrollment] = $this->records($user);
 
         $this->actingAs($user)->get(route('dashboard'))->assertOk()
-            ->assertSee('Cartera pendiente')->assertSee('$850.000')->assertSee('Cartera vencida')->assertSee('$80.000')->assertSee('Recaudo de hoy')->assertSee('$150.000');
+            ->assertSee('Cartera pendiente')->assertSee('$850.000')->assertSee('Cartera vencida')->assertSee('$80.000')->assertSee('Recaudo de hoy')->assertSee('$150.000')->assertSee('Recaudo de la semana')->assertSee('Recaudo del mes')->assertSee('Estudiantes con saldo pendiente');
         $this->get(route('reports.index'))->assertOk()->assertSee('Cartera general')->assertSee('Resumen por curso / grupo');
         $this->get(route('reports.show', ['report' => 'portfolio', 'student_id' => $enrollment->student_id]))->assertOk()->assertSee('Ana Reporte')->assertViewHas('records', fn ($records) => $records->total() === 1 && $records->first()->id === $enrollment->id);
         $this->get(route('reports.show', ['report' => 'revenue', 'student_id' => $otherEnrollment->student_id]))->assertOk()->assertSee('$50.000')->assertViewHas('records', fn ($records) => $records->total() === 1 && $records->first()->enrollment_id === $otherEnrollment->id);

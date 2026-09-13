@@ -28,8 +28,10 @@ class OperationalMetrics
             'portfolioPending' => (float) $portfolioPending,
             'overduePortfolio' => (float) (clone $overdue)->sum('amount'),
             'todayRevenue' => (float) (clone $payments)->whereDate('payment_date', today())->sum('amount'),
+            'weekRevenue' => (float) (clone $payments)->whereBetween('payment_date', [today()->startOfWeek(), today()->endOfWeek()])->sum('amount'),
             'monthRevenue' => (float) (clone $payments)->whereBetween('payment_date', [today()->startOfMonth(), today()->endOfMonth()])->sum('amount'),
             'delinquentStudents' => (clone $overdue)->distinct('enrollment_id')->count('enrollment_id'),
+            'studentsWithBalance' => Enrollment::query()->join('students', 'students.id', '=', 'enrollments.student_id')->leftJoinSub($validPayments, 'balance_payments', 'balance_payments.enrollment_id', '=', 'enrollments.id')->where('students.organization_id', $organizationId)->whereNotNull('agreed_amount')->whereRaw('agreed_amount - COALESCE(balance_payments.paid, 0) > 0')->distinct('student_id')->count('student_id'),
         ];
     }
 }

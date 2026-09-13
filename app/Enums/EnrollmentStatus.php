@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use App\Support\Status;
+
 enum EnrollmentStatus: string
 {
     case Active = 'active';
@@ -13,9 +15,6 @@ enum EnrollmentStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Active => 'Activa', self::Inactive => 'Inactiva', self::Withdrawn => 'Retirada',
-            self::Completed => 'Completada', self::Suspended => 'Suspendida', self::Pending => 'Pendiente',
-        };
+        return Status::label($this);
     }
 }

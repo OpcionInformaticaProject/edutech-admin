@@ -7,6 +7,7 @@ use App\Models\Enrollment;
 use App\Models\Group;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Support\Status;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -16,6 +17,10 @@ class ReportController extends Controller
         'portfolio' => 'Cartera general', 'overdue' => 'Cartera vencida', 'revenue' => 'Recaudo',
         'student-payments' => 'Pagos por estudiante', 'enrollments' => 'Estado de matrículas',
         'high-delinquency' => 'Más de 3 obligaciones vencidas', 'groups' => 'Resumen por curso / grupo',
+    ];
+
+    private const DESCRIPTIONS = [
+        'portfolio' => 'Valores contratados, recaudo y saldo actual por matrícula.', 'overdue' => 'Obligaciones pendientes cuya fecha de vencimiento confiable ya pasó.', 'revenue' => 'Pagos válidos registrados durante el periodo seleccionado.', 'student-payments' => 'Historial de pagos válidos agrupable por estudiante.', 'enrollments' => 'Estado académico y financiero de las matrículas.', 'high-delinquency' => 'Matrículas con más de tres obligaciones realmente vencidas.', 'groups' => 'Contratación, recaudo y saldo consolidado por curso y grupo.',
     ];
 
     public function index(Request $request)
@@ -37,12 +42,14 @@ class ReportController extends Controller
             return $this->csv($report, $query->get());
         }
 
-        $totals = $this->totals($report, (clone $query)->get());
+        $allRecords = (clone $query)->get();
+        $totals = $this->totals($report, $allRecords);
+        $methodTotals = in_array($report, ['revenue', 'student-payments'], true) ? $allRecords->groupBy('method')->map->sum('amount') : collect();
         $records = $query->paginate(25)->withQueryString();
         $groups = Group::query()->whereHas('course.program', fn ($q) => $q->where('organization_id', $organizationId))->with('course')->orderBy('name')->get();
         $students = Student::where('organization_id', $organizationId)->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'last_name']);
 
-        return view('reports.show', ['report' => $report, 'title' => self::REPORTS[$report], 'records' => $records, 'totals' => $totals, 'groups' => $groups, 'students' => $students]);
+        return view('reports.show', ['report' => $report, 'title' => self::REPORTS[$report], 'description' => self::DESCRIPTIONS[$report], 'records' => $records, 'totals' => $totals, 'methodTotals' => $methodTotals, 'groups' => $groups, 'students' => $students]);
     }
 
     private function query(Request $request, string $report, string $organizationId)
@@ -58,7 +65,7 @@ class ReportController extends Controller
         }
         if ($report === 'overdue') {
             return ChargeSchedule::query()->where('status', 'pending')->whereNotNull('due_date')->whereDate('due_date', '<', today())
-                ->whereHas('enrollment.student', fn ($q) => $q->where('organization_id', $organizationId))->with(['enrollment.student', 'enrollment.group.course'])
+                ->whereHas('enrollment.student', fn ($q) => $q->where('organization_id', $organizationId))->with(['enrollment.student.contacts', 'enrollment.group.course', 'enrollment.validPayments'])
                 ->when($request->filled('student_id'), fn ($q) => $q->whereHas('enrollment', fn ($e) => $e->where('student_id', $request->string('student_id'))))
                 ->when($request->filled('group_id'), fn ($q) => $q->whereHas('enrollment', fn ($e) => $e->where('group_id', $request->string('group_id'))))->orderBy('due_date');
         }
@@ -73,11 +80,13 @@ class ReportController extends Controller
         if ($report === 'groups') {
             return Group::query()->whereHas('course.program', fn ($q) => $q->where('organization_id', $organizationId))->with('course')
                 ->withCount('enrollments')->withSum('enrollments as agreed_total', 'agreed_amount')
+                ->addSelect(['revenue_total' => Payment::query()->selectRaw('COALESCE(SUM(payments.amount),0)')->join('enrollments', 'enrollments.id', '=', 'payments.enrollment_id')->whereColumn('enrollments.group_id', 'groups.id')->where('payments.status', 'valid')])
                 ->when($request->filled('group_id'), fn ($q) => $q->whereKey($request->string('group_id')))->orderBy('name');
         }
 
         return Enrollment::query()->whereHas('student', fn ($q) => $q->where('organization_id', $organizationId))->with(['student', 'group.course'])
             ->withSum('validPayments as valid_payments_sum_amount', 'amount')
+            ->withMax('validPayments as last_payment_date', 'payment_date')
             ->when($request->filled('student_id'), fn ($q) => $q->where('student_id', $request->string('student_id')))
             ->when($request->filled('group_id'), fn ($q) => $q->where('group_id', $request->string('group_id')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
@@ -88,7 +97,7 @@ class ReportController extends Controller
     private function totals(string $report, $records): array
     {
         return match ($report) {
-            'revenue', 'student-payments' => ['Registros' => $records->count(), 'Total recaudado' => $records->sum('amount')],
+            'revenue', 'student-payments' => ['Número de pagos' => $records->count(), 'Total recaudado' => $records->sum('amount'), 'Promedio por pago' => $records->avg('amount') ?? 0, 'Hoy' => $records->where('payment_date', '>=', today()->startOfDay())->sum('amount'), 'Semana' => $records->where('payment_date', '>=', today()->startOfWeek())->sum('amount'), 'Mes' => $records->where('payment_date', '>=', today()->startOfMonth())->sum('amount')],
             'overdue' => ['Obligaciones vencidas' => $records->count(), 'Total vencido' => $records->sum('amount')],
             'high-delinquency' => ['Estudiantes' => $records->count(), 'Obligaciones' => $records->sum('overdue_count')],
             'groups' => ['Grupos' => $records->count(), 'Matrículas' => $records->sum('enrollments_count')],
@@ -109,7 +118,7 @@ class ReportController extends Controller
                 } elseif ($record instanceof Group) {
                     $row = [$report, $record->course->name.' / '.$record->name, 'Matrículas: '.$record->enrollments_count, $record->agreed_total];
                 } else {
-                    $row = [$report, $record->student->full_name, $record->status->value, $report === 'high-delinquency' ? $record->overdue_amount : $record->balance];
+                    $row = [$report, $record->student->full_name, Status::label($record->status), $report === 'high-delinquency' ? $record->overdue_amount : $record->balance];
                 }
                 fputcsv($output, $row, ';');
             }
