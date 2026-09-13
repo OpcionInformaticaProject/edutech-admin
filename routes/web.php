@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentReversalController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StudentController;
 use App\Livewire\Students\StudentTable;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/datos-por-revisar/{enrollment}/edit', [EnrollmentReviewController::class, 'edit'])->name('enrollment-reviews.edit');
     Route::put('/datos-por-revisar/{enrollment}', [EnrollmentReviewController::class, 'update'])->name('enrollment-reviews.update');
     Route::get('/cartera', PortfolioController::class)->name('portfolio.index');
+    Route::get('/informes', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/informes/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::get('/enrollments/{enrollment}/payments/create', [PaymentController::class, 'create'])->name('payments.create');
     Route::post('/enrollments/{enrollment}/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::post('/payments/{payment}/reverse', [PaymentReversalController::class, 'store'])->name('payments.reverse');

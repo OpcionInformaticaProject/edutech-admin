@@ -47,6 +47,11 @@ class Enrollment extends Model
         return $this->hasMany(EnrollmentReview::class);
     }
 
+    public function chargeSchedules()
+    {
+        return $this->hasMany(ChargeSchedule::class);
+    }
+
     public function getTotalPaidAttribute(): float
     {
         return (float) ($this->valid_payments_sum_amount ?? $this->validPayments()->sum('amount'));

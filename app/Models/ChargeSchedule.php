@@ -13,4 +13,14 @@ class ChargeSchedule extends Model
     use HasFactory, HasUlids;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return ['due_date' => 'date', 'amount' => 'decimal:2'];
+    }
+
+    public function enrollment()
+    {
+        return $this->belongsTo(Enrollment::class);
+    }
 }

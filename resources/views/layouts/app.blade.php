@@ -12,17 +12,14 @@
         <div class="flex h-20 items-center gap-3 border-b border-white/10 px-7">
             <x-brand-logo :organization="auth()->user()->organization" class="h-11 max-w-44 text-white" />
         </div>
-        <nav class="flex-1 space-y-1 px-4 py-7 text-sm">
-            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">⌂ <span>Dashboard</span></a>
-            <a class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}" href="{{ route('students.index') }}">♙ <span>Estudiantes</span></a>
-            <a class="nav-link {{ request()->routeIs('enrollments.*') ? 'active' : '' }}" href="{{ route('enrollments.index') }}">▤ <span>Matrículas</span></a>
-            <a class="nav-link {{ request()->routeIs('portfolio.*', 'payments.*', 'receipts.*') ? 'active' : '' }}" href="{{ route('portfolio.index') }}">$ <span>Cartera</span></a>
-            <a class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}" href="{{ route('imports.create') }}">⇧ <span>Importar Excel</span></a>
-            <a class="nav-link {{ request()->routeIs('enrollment-reviews.*') ? 'active' : '' }}" href="{{ route('enrollment-reviews.index') }}">! <span>Datos por revisar</span></a>
-            <div class="px-4 pb-2 pt-7 text-[10px] font-bold uppercase tracking-[.2em] text-slate-500">Configuración</div>
-            <span class="nav-link opacity-45">◇ <span>Programas y cursos</span></span>
-            <span class="nav-link opacity-45">⌖ <span>Sedes y grupos</span></span>
-            @if(in_array(auth()->user()->role->value, ['superadmin','admin'], true))<a class="nav-link {{ request()->routeIs('branding.*') ? 'active' : '' }}" href="{{ route('branding.edit') }}">◐ <span>Apariencia / Marca</span></a>@endif
+        <nav class="flex-1 space-y-1 overflow-y-auto px-4 py-5 text-sm">
+            <div class="nav-section">Inicio</div><a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">⌂ <span>Dashboard</span></a>
+            <div class="nav-section">Estudiantes</div><a class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}" href="{{ route('students.index') }}">♙ <span>Directorio</span></a>
+            <div class="nav-section">Matrículas</div><a class="nav-link {{ request()->routeIs('enrollments.*') ? 'active' : '' }}" href="{{ route('enrollments.index') }}">▤ <span>Matrículas</span></a>
+            <div class="nav-section">Cartera</div><a class="nav-link {{ request()->routeIs('portfolio.*') ? 'active' : '' }}" href="{{ route('portfolio.index') }}">$ <span>Cartera general</span></a>
+            <div class="nav-section">Pagos</div><a class="nav-link {{ request()->routeIs('payments.*', 'receipts.*') || (request()->routeIs('reports.show') && in_array(request()->route('report'), ['revenue','student-payments'], true)) ? 'active' : '' }}" href="{{ route('reports.show','revenue') }}">◎ <span>Movimientos</span></a>
+            <div class="nav-section">Informes</div><a class="nav-link {{ request()->routeIs('reports.index') || (request()->routeIs('reports.show') && !in_array(request()->route('report'), ['revenue','student-payments'], true)) ? 'active' : '' }}" href="{{ route('reports.index') }}">▦ <span>Informes operativos</span></a>
+            <div class="nav-section">Administración</div><a class="nav-link {{ request()->routeIs('enrollment-reviews.*') ? 'active' : '' }}" href="{{ route('enrollment-reviews.index') }}">! <span>Datos por revisar</span></a><a class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}" href="{{ route('imports.create') }}">⇧ <span>Importar Excel</span></a>@if(in_array(auth()->user()->role->value, ['superadmin','admin'], true))<a class="nav-link {{ request()->routeIs('branding.*') ? 'active' : '' }}" href="{{ route('branding.edit') }}">◐ <span>Apariencia / Marca</span></a>@endif
         </nav>
         <div class="border-t border-white/10 p-4">
             <div class="mb-3 flex items-center gap-3 px-3"><div class="grid size-9 place-items-center rounded-full bg-teal-400/20 font-bold text-teal-300">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div class="min-w-0"><div class="truncate text-sm font-semibold">{{ auth()->user()->name }}</div><div class="text-xs capitalize text-slate-400">{{ auth()->user()->role->value }}</div></div></div>
