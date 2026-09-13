@@ -37,6 +37,16 @@ class Enrollment extends Model
         return $this->payments()->where('status', 'valid');
     }
 
+    public function importRows()
+    {
+        return $this->hasMany(ImportRow::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(EnrollmentReview::class);
+    }
+
     public function getTotalPaidAttribute(): float
     {
         return (float) ($this->valid_payments_sum_amount ?? $this->validPayments()->sum('amount'));

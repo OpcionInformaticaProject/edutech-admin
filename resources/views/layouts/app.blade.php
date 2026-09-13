@@ -18,8 +18,7 @@
             <a class="nav-link {{ request()->routeIs('enrollments.*') ? 'active' : '' }}" href="{{ route('enrollments.index') }}">▤ <span>Matrículas</span></a>
             <a class="nav-link {{ request()->routeIs('portfolio.*', 'payments.*', 'receipts.*') ? 'active' : '' }}" href="{{ route('portfolio.index') }}">$ <span>Cartera</span></a>
             <a class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}" href="{{ route('imports.create') }}">⇧ <span>Importar Excel</span></a>
-            <a class="nav-link {{ request()->routeIs('portfolio.*', 'payments.*', 'receipts.*') ? 'active' : '' }}" href="{{ route('portfolio.index') }}">$ <span>Cartera</span></a>
-            <a class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}" href="{{ route('imports.create') }}">⇧ <span>Importar Excel</span></a>
+            <a class="nav-link {{ request()->routeIs('enrollment-reviews.*') ? 'active' : '' }}" href="{{ route('enrollment-reviews.index') }}">! <span>Datos por revisar</span></a>
             <div class="px-4 pb-2 pt-7 text-[10px] font-bold uppercase tracking-[.2em] text-slate-500">Configuración</div>
             <span class="nav-link opacity-45">◇ <span>Programas y cursos</span></span>
             <span class="nav-link opacity-45">⌖ <span>Sedes y grupos</span></span>

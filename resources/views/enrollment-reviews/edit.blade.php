@@ -1,0 +1,13 @@
+@extends('layouts.app', ['title' => 'Revisar matrícula'])
+@section('content')
+@php($source = $enrollment->importRows->sortBy('source_row')->first())
+<div class="mx-auto max-w-3xl"><div class="card mb-5 p-6"><div class="flex flex-wrap justify-between gap-3"><div><h2 class="text-2xl font-black">{{ $enrollment->student->full_name }}</h2><p class="text-sm text-slate-500">Excel: {{ $source?->source_sheet }} · fila {{ $source?->source_row }}</p></div><span class="badge bg-amber-100 text-amber-800">Requiere revisión</span></div><div class="mt-5 grid gap-4 sm:grid-cols-2"><div><dt>Horario original</dt><dd>{{ data_get($source?->normalized_data, 'schedule') ?: 'No informado' }}</dd></div><div><dt>Inconsistencias</dt><dd>{{ implode(' · ', $source?->inconsistencies ?? []) }}</dd></div></div></div>
+<form class="card grid gap-5 p-6 sm:grid-cols-2" method="POST" action="{{ route('enrollment-reviews.update', $enrollment) }}">@csrf @method('PUT')
+<label>Fecha de matrícula<input class="input mt-1 w-full" type="date" name="enrollment_date" value="{{ old('enrollment_date', $enrollment->enrollment_date?->format('Y-m-d')) }}" required></label>
+<label>Fecha inicio de cobro<input class="input mt-1 w-full" type="date" name="billing_start_date" value="{{ old('billing_start_date', $enrollment->billing_start_date?->format('Y-m-d')) }}" required></label>
+<label>Valor acordado<input class="input mt-1 w-full" type="number" min="1" step="0.01" name="agreed_amount" value="{{ old('agreed_amount', $enrollment->agreed_amount) }}" required></label>
+<label>Curso / grupo<select class="input mt-1 w-full" name="group_id" required>@foreach($groups as $group)<option value="{{ $group->id }}" @selected(old('group_id', $enrollment->group_id)===$group->id)>{{ $group->course->name }} — {{ $group->name }}</option>@endforeach</select></label>
+<label>Estado<select class="input mt-1 w-full" name="status" required>@foreach(\App\Enums\EnrollmentStatus::cases() as $status)<option value="{{ $status->value }}" @selected(old('status', $enrollment->status->value)===$status->value)>{{ $status->label() }}</option>@endforeach</select></label>
+<div class="sm:col-span-2">@if($errors->any())<div class="mb-4 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">{{ $errors->first() }}</div>@endif<div class="flex flex-col gap-3 sm:flex-row"><button class="btn-primary">Marcar como revisado</button><a class="btn-secondary" href="{{ route('enrollment-reviews.index') }}">Cancelar</a></div><p class="mt-3 text-xs text-slate-500">Esta acción crea una auditoría. No altera pagos, recibos ni la fila original importada.</p></div>
+</form></div>
+@endsection

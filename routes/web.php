@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\EnrollmentReviewController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentReversalController;
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/estudiantes', StudentTable::class)->name('students.index');
     Route::resource('students', StudentController::class)->only(['create', 'store', 'show', 'edit', 'update']);
     Route::resource('enrollments', EnrollmentController::class)->only(['index', 'create', 'store']);
+    Route::get('/datos-por-revisar', [EnrollmentReviewController::class, 'index'])->name('enrollment-reviews.index');
+    Route::get('/datos-por-revisar/{enrollment}/edit', [EnrollmentReviewController::class, 'edit'])->name('enrollment-reviews.edit');
+    Route::put('/datos-por-revisar/{enrollment}', [EnrollmentReviewController::class, 'update'])->name('enrollment-reviews.update');
     Route::get('/cartera', PortfolioController::class)->name('portfolio.index');
     Route::get('/enrollments/{enrollment}/payments/create', [PaymentController::class, 'create'])->name('payments.create');
     Route::post('/enrollments/{enrollment}/payments', [PaymentController::class, 'store'])->name('payments.store');
